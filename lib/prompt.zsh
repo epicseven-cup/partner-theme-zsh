@@ -22,9 +22,9 @@ _partner_precmd() {
   if [[ -n $REPLY_STAGE ]]; then
     _partner_git_counts
     local lines="" counts=""
-    (( REPLY_FILES > 0 )) && lines+="${REPLY_FILES} file${${REPLY_FILES:#1}:+s}"
-    (( REPLY_DELETED > 0 )) && lines+="${lines:+ }%F{167}-${REPLY_DELETED}%f"
+    (( REPLY_FILES > 0 )) && lines+="${PARTNER_FILES_ICON}${REPLY_FILES}"
     (( REPLY_ADDED > 0 )) && lines+="${lines:+ }%F{71}+${REPLY_ADDED}%f"
+    (( REPLY_DELETED > 0 )) && lines+="${lines:+ }%F{167}-${REPLY_DELETED}%f"
     [[ -n $lines ]] && counts+=" %F{240}│%f ${lines}"
     (( REPLY_UNPUSHED > 0 )) && counts+=" %F{240}│%f %F{214}↑${REPLY_UNPUSHED}%f"
     top="$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{$lc}${REPLY_BAR}%f %F{240}${REPLY_COUNT} commit${${REPLY_COUNT:#1}:+s}%f${counts}"$'\n'

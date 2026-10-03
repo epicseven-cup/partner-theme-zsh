@@ -4,8 +4,8 @@ An [Oh My Zsh](https://ohmyz.sh) theme where every git branch hatches its own pe
 Your pet evolves as you commit on the branch, so your prompt shows how much work you've put in.
 
 ```
- ◆ Wizard Cat  ██░░ 7 commits
- ~/projects/app  ⎇ feature/login* ±3 ↑2  ❯
+ ◆ Wizard Cat  ██░░ 7 commits │ ±3 ↑2
+ ~/projects/app  ⎇ feature/login*  ❯
 ```
 
 ## Requirements
@@ -52,10 +52,10 @@ Updates are fast-forward only, and the new version loads the next time you open 
 
 The prompt has two lines:
 
-1. **The pet badge**: name, progress bar and your commit count on this branch. Hidden outside a git repo and on a detached HEAD.
+1. **The pet badge**: name, progress bar, your commit count on this branch, then `±N ↑N` (see below). Hidden outside a git repo and on a detached HEAD.
 2. **The working line**: current path, git branch, then the prompt arrow.
 
-The branch segment is green when clean and amber when there are changes. Its suffix shows what changed: `*` unstaged, `+` staged, `?` untracked files. After the branch name, `±N` is the number of files with uncommitted changes (untracked included) and `↑N` is the number of commits not yet pushed to `origin`. Each is hidden when it is zero, and `↑N` is hidden when the repo has no `origin`.
+The branch segment is green when clean and amber when there are changes. Its suffix shows what changed: `*` unstaged, `+` staged, `?` untracked files. After the commit count, separated by `│`, `±N` is the number of files with uncommitted changes (untracked included) and `↑N` is the number of commits not yet pushed to `origin`. Each is hidden when it is zero, and `↑N` is hidden when the repo has no `origin`.
 
 If the last command failed, a red `✖ <exit code>` badge appears before the path and the arrow turns red.
 

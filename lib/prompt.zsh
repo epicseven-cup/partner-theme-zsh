@@ -20,7 +20,12 @@ _partner_precmd() {
   # Line 1: the pet, with its progress bar (only inside a repo, on a branch)
   local top=""
   if [[ -n $REPLY_STAGE ]]; then
-    top="$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{$lc}${REPLY_BAR}%f %F{240}${REPLY_COUNT} commit${${REPLY_COUNT:#1}:+s}%f"$'\n'
+    _partner_git_counts
+    local counts=""
+    (( REPLY_CHANGES > 0 )) && counts+=" ±${REPLY_CHANGES}"
+    (( REPLY_UNPUSHED > 0 )) && counts+=" ↑${REPLY_UNPUSHED}"
+    [[ -n $counts ]] && counts=" %F{240}│%f%F{214}${counts}%f"
+    top="$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{$lc}${REPLY_BAR}%f %F{240}${REPLY_COUNT} commit${${REPLY_COUNT:#1}:+s}%f${counts}"$'\n'
   fi
 
   # Line 2: error (if any), path, git, prompt arrow
@@ -32,11 +37,7 @@ _partner_precmd() {
   local git_seg=""
   if [[ -n $vcs_info_msg_0_ ]]; then
     local gc=35; [[ $vcs_info_msg_0_ == *[*+?]* ]] && gc=178
-    _partner_git_counts
-    local counts=""
-    (( REPLY_CHANGES > 0 )) && counts+=" ±${REPLY_CHANGES}"
-    (( REPLY_UNPUSHED > 0 )) && counts+=" ↑${REPLY_UNPUSHED}"
-    git_seg="%K{$gc}%F{232} ⎇ ${vcs_info_msg_0_}${counts} %f%k%F{$gc}▌%f"
+    git_seg="%K{$gc}%F{232} ⎇ ${vcs_info_msg_0_} %f%k%F{$gc}▌%f"
   fi
   PROMPT="${top}${err}${path_seg}${git_seg} %F{$lc}❯%f "
   RPROMPT=""

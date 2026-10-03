@@ -15,3 +15,7 @@ typeset -gA DIGI_STAGE_COLORS
 : ${DIGI_STAGE_COLORS[GRAND]:=135}    # violet
 : ${DIGI_STAGE_COLORS[LEGEND]:=199}   # hot magenta
 : ${DIGI_STAGE_COLORS[NONE]:=244}     # outside a repo / detached HEAD
+
+# Progress bar glyphs (██░░). Override in ~/.zshrc if you like.
+: ${DIGI_BAR_FULL:=█}
+: ${DIGI_BAR_EMPTY:=░}

@@ -4,7 +4,7 @@ An [Oh My Zsh](https://ohmyz.sh) theme where every git branch hatches its own pe
 Your pet evolves as you commit on the branch, so your prompt shows how much work you've put in.
 
 ```
- ◆ Wizard Cat  ▰▰▱▱ 7 commits
+ ◆ Wizard Cat  ██░░ 7 commits
  ~/projects/app  ⎇ feature/login*  ❯
 ```
 
@@ -12,7 +12,7 @@ Your pet evolves as you commit on the branch, so your prompt shows how much work
 
 - zsh and [Oh My Zsh](https://ohmyz.sh)
 - git
-- A terminal with 256-colour support and Unicode (for `◆ ▰ ▱ ▌ ⎇ ❯ ✖`). No special font needed.
+- A terminal with 256-colour support and Unicode (for `◆ █ ░ ▌ ⎇ ❯ ✖`). No special font needed.
 
 ## Install
 

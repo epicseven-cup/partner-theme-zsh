@@ -10,9 +10,12 @@ _digi_seed() { git config --get "digivice.$1.seed" 2>/dev/null || print 0 }
 #   REPLY_STAGE  EGG | BABY | CLASS | GRAND | LEGEND  (empty = no pet shown)
 #   REPLY_NAME   e.g. "Grand Wizard Cat"
 #   REPLY_FULL   name incl. final-form title, even before it's earned
-#   REPLY_BAR    ▰▰▱▱           REPLY_COUNT your commits on the branch
+#   REPLY_BAR    ██░░           REPLY_COUNT your commits on the branch
 #   REPLY_NEXT   commits needed for the next evolution (empty at max)
 #   REPLY_FIRE   1 when you've committed DIGI_FIRE_AT+ times today
+# Progress bar with $1 of 4 cells filled, using DIGI_BAR_FULL / DIGI_BAR_EMPTY.
+_digi_bar() { print -rn -- "${(pl:$1::$DIGI_BAR_FULL:)}${(pl:$((4-$1))::$DIGI_BAR_EMPTY:)}" }
+
 typeset -gA _DIGI_PET_CACHE
 _digi_pet() {
   REPLY_STAGE= REPLY_NAME= REPLY_FULL= REPLY_BAR= REPLY_COUNT= REPLY_NEXT= REPLY_FIRE=
@@ -36,14 +39,14 @@ _digi_pet() {
   REPLY_FULL="$rank $cls $animal $title"
 
   if   (( n >= DIGI_LEVELS[4] )); then
-    REPLY_STAGE=LEGEND REPLY_NAME="$rank $cls $animal $title" REPLY_BAR='▰▰▰▰'
+    REPLY_STAGE=LEGEND REPLY_NAME="$rank $cls $animal $title" REPLY_BAR=$(_digi_bar 4)
   elif (( n >= DIGI_LEVELS[3] )); then
-    REPLY_STAGE=GRAND  REPLY_NAME="$rank $cls $animal"        REPLY_BAR='▰▰▰▱' REPLY_NEXT=$DIGI_LEVELS[4]
+    REPLY_STAGE=GRAND  REPLY_NAME="$rank $cls $animal"        REPLY_BAR=$(_digi_bar 3) REPLY_NEXT=$DIGI_LEVELS[4]
   elif (( n >= DIGI_LEVELS[2] )); then
-    REPLY_STAGE=CLASS  REPLY_NAME="$cls $animal"              REPLY_BAR='▰▰▱▱' REPLY_NEXT=$DIGI_LEVELS[3]
+    REPLY_STAGE=CLASS  REPLY_NAME="$cls $animal"              REPLY_BAR=$(_digi_bar 2) REPLY_NEXT=$DIGI_LEVELS[3]
   elif (( n >= DIGI_LEVELS[1] )); then
-    REPLY_STAGE=BABY   REPLY_NAME="$animal"                   REPLY_BAR='▰▱▱▱' REPLY_NEXT=$DIGI_LEVELS[2]
+    REPLY_STAGE=BABY   REPLY_NAME="$animal"                   REPLY_BAR=$(_digi_bar 1) REPLY_NEXT=$DIGI_LEVELS[2]
   else
-    REPLY_STAGE=EGG    REPLY_NAME="Egg"                       REPLY_BAR='▱▱▱▱' REPLY_NEXT=$DIGI_LEVELS[1]
+    REPLY_STAGE=EGG    REPLY_NAME="Egg"                       REPLY_BAR=$(_digi_bar 0) REPLY_NEXT=$DIGI_LEVELS[1]
   fi
 }

@@ -6,8 +6,8 @@ zstyle ':vcs_info:git:*' stagedstr '+'
 zstyle ':vcs_info:git:*' unstagedstr '*'
 zstyle ':vcs_info:git:*' formats '%b%u%c'
 zstyle ':vcs_info:git:*' actionformats '%b|%a%u%c'
-zstyle ':vcs_info:git*+set-message:*' hooks digi-untracked
-+vi-digi-untracked() {
+zstyle ':vcs_info:git*+set-message:*' hooks partner-untracked
++vi-partner-untracked() {
   [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == true ]] &&
     [[ -n $(git ls-files --others --exclude-standard 2>/dev/null | head -1) ]] &&
     hook_com[unstaged]+='?'
@@ -15,7 +15,7 @@ zstyle ':vcs_info:git*+set-message:*' hooks digi-untracked
 
 
 # The repo's default branch as local + remote refs that exist, e.g. "main origin/main".
-_digi_default_refs() {
+_partner_default_refs() {
   local -a refs
   local r=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)
   local name=${r#origin/}
@@ -34,7 +34,7 @@ _digi_default_refs() {
 # The commit a branch was created from, read from the oldest entry in its local
 # reflog ("branch: Created from ..."). Empty if that entry is gone or the branch
 # was rebased since (the start point is no longer in its history).
-_digi_branch_start() {
+_partner_branch_start() {
   local hash msg
   git log -g --format='%H%x09%gs' "refs/heads/$1" 2>/dev/null | tail -1 | IFS=$'\t' read -r hash msg
   [[ $msg == 'branch: Created from'* ]] || return 1
@@ -44,8 +44,8 @@ _digi_branch_start() {
   print -r -- $hash
 }
 
-# How DIGI_BRANCH_SCOPE was decided, for `digi status`.
-typeset -g DIGI_BRANCH_SCOPE=
+# How PARTNER_BRANCH_SCOPE was decided, for `partner status`.
+typeset -g PARTNER_BRANCH_SCOPE=
 
 # Your commits on the current branch (merges excluded). Returns 1 on a detached HEAD.
 #  - default branch: all your commits on it
@@ -53,21 +53,21 @@ typeset -g DIGI_BRANCH_SCOPE=
 #    own line only (so merging main in, or merging it into main, changes nothing)
 #  - fallback when the branch-off point is unknown (reflog expired, or rebased):
 #    your commits that aren't on the default branch
-_digi_branch_count() {
+_partner_branch_count() {
   local branch=$(git symbolic-ref --short -q HEAD 2>/dev/null)
   [[ -n $branch ]] || return 1
   local me=$(git config user.email 2>/dev/null)
   local -a who=(); [[ -n $me ]] && who=(--fixed-strings "--author=<$me>")
-  local -a d=(${=$(_digi_default_refs)})
+  local -a d=(${=$(_partner_default_refs)})
   local start
   if (( ! ${#d} )) || [[ $branch == ${d[1]} ]]; then
-    DIGI_BRANCH_SCOPE="all your commits on ${branch}"
+    PARTNER_BRANCH_SCOPE="all your commits on ${branch}"
     git rev-list --count --no-merges $who HEAD 2>/dev/null || print 0
-  elif start=$(_digi_branch_start $branch); then
-    DIGI_BRANCH_SCOPE="your commits since branching off at ${start:0:7}"
+  elif start=$(_partner_branch_start $branch); then
+    PARTNER_BRANCH_SCOPE="your commits since branching off at ${start:0:7}"
     git rev-list --count --no-merges --first-parent $who HEAD "^$start" 2>/dev/null || print 0
   else
-    DIGI_BRANCH_SCOPE="your commits not on ${d[1]} (rebased, or branch-off point unknown)"
+    PARTNER_BRANCH_SCOPE="your commits not on ${d[1]} (rebased, or branch-off point unknown)"
     git rev-list --count --no-merges $who HEAD --not ${d[2,-1]} 2>/dev/null || print 0
   fi
 }
@@ -75,7 +75,7 @@ _digi_branch_count() {
 # Prints "hash<TAB>message" for each commit made in this repo today (any branch),
 # read from the local HEAD reflog. Counts new commits and cherry-picks; skips
 # amends, merges, pulls, rebases and checkouts.
-_digi_commits_today() {
+_partner_commits_today() {
   local today=$(date +%Y-%m-%d) ref hash msg
   git log -g --date=short --format='%gd%x09%h%x09%gs' HEAD 2>/dev/null |
   while IFS=$'\t' read -r ref hash msg; do
@@ -86,4 +86,4 @@ _digi_commits_today() {
   done
 }
 
-_digi_count_lines() { local -a l; [[ -n $1 ]] && l=("${(@f)1}"); print ${#l} }
+_partner_count_lines() { local -a l; [[ -n $1 ]] && l=("${(@f)1}"); print ${#l} }

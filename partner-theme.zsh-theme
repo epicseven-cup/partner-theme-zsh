@@ -2,8 +2,10 @@
 #
 # Install: see README.md, then set ZSH_THEME="partner-theme" in ~/.zshrc
 #
-#   digi status      # meet this branch's pet and see when it evolves next
-#   digi reroll      # hatch a different pet for this branch
+#   partner status      # meet this branch's pet and see when it evolves next
+#   partner reroll      # hatch a different pet for this branch
+#   partner update      # pull the latest theme version
+#   partner reset       # restore a clean install from the remote
 #
 # Each branch gets a random animal, class and title, picked from the repo +
 # branch name so it stays the same every time you come back. It evolves with
@@ -23,9 +25,10 @@
 # badge turns to embers: dark red, with the name still in its stage colour.
 #
 # Tweak in ~/.zshrc before oh-my-zsh is sourced:
-#   DIGI_LEVELS=(1 5 15 30)   evolution thresholds
-#   DIGI_FIRE_AT=6            commits today needed for ON FIRE
-#   DIGI_FIRE_BG=52           ember background when on fire
+#   PARTNER_LEVELS=(1 5 15 30)   evolution thresholds
+#   PARTNER_FIRE_AT=6            commits today needed for ON FIRE
+#   PARTNER_FIRE_BG=52           ember background when on fire
+#   PARTNER_AUTO_UPDATE=1        pull theme updates in the background once a day
 # Outside a repo or on a detached HEAD the pet is hidden.
 # A failed command flashes its exit code.
 
@@ -33,10 +36,10 @@ autoload -Uz vcs_info add-zsh-hook
 setopt prompt_subst
 
 # Resolve through symlinks so this works when linked into $ZSH_CUSTOM/themes.
-_digi_root=${${(%):-%x}:A:h}
+_partner_root=${${(%):-%x}:A:h}
 
 # config first (honours anything already set in ~/.zshrc), then logic
-for _digi_f in "$_digi_root"/config/*.zsh "$_digi_root"/lib/{git,pet,prompt,digi}.zsh; do
-  source "$_digi_f"
+for _partner_f in "$_partner_root"/config/*.zsh "$_partner_root"/lib/{git,pet,prompt,partner}.zsh; do
+  source "$_partner_f"
 done
-unset _digi_f
+unset _partner_f

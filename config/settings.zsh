@@ -1,21 +1,21 @@
 # Evolution thresholds and fire mode. Set these in ~/.zshrc to override.
-(( ${#DIGI_LEVELS} == 4 )) || typeset -ga DIGI_LEVELS=(1 5 15 30)
-typeset -gi DIGI_FIRE_AT=${DIGI_FIRE_AT:-6}
+(( ${#PARTNER_LEVELS} == 4 )) || typeset -ga PARTNER_LEVELS=(1 5 15 30)
+typeset -gi PARTNER_FIRE_AT=${PARTNER_FIRE_AT:-6}
 
 # When you're on fire the badge turns to embers: dark red background, with the
 # pet's name still in its stage colour.
-: ${DIGI_FIRE_BG:=52}    # ember red
+: ${PARTNER_FIRE_BG:=52}    # ember red
 
 # Colour per evolution stage (256-colour codes). Override in ~/.zshrc,
-# e.g.  DIGI_STAGE_COLORS[LEGEND]=220
-typeset -gA DIGI_STAGE_COLORS
-: ${DIGI_STAGE_COLORS[EGG]:=250}      # pale shell grey
-: ${DIGI_STAGE_COLORS[BABY]:=43}      # aqua
-: ${DIGI_STAGE_COLORS[CLASS]:=208}    # orange
-: ${DIGI_STAGE_COLORS[GRAND]:=135}    # violet
-: ${DIGI_STAGE_COLORS[LEGEND]:=199}   # hot magenta
-: ${DIGI_STAGE_COLORS[NONE]:=244}     # outside a repo / detached HEAD
+# e.g.  PARTNER_STAGE_COLORS[LEGEND]=220
+typeset -gA PARTNER_STAGE_COLORS
+: ${PARTNER_STAGE_COLORS[EGG]:=250}      # pale shell grey
+: ${PARTNER_STAGE_COLORS[BABY]:=43}      # aqua
+: ${PARTNER_STAGE_COLORS[CLASS]:=208}    # orange
+: ${PARTNER_STAGE_COLORS[GRAND]:=135}    # violet
+: ${PARTNER_STAGE_COLORS[LEGEND]:=199}   # hot magenta
+: ${PARTNER_STAGE_COLORS[NONE]:=244}     # outside a repo / detached HEAD
 
 # Progress bar glyphs (██░░). Override in ~/.zshrc if you like.
-: ${DIGI_BAR_FULL:=█}
-: ${DIGI_BAR_EMPTY:=░}
+: ${PARTNER_BAR_FULL:=█}
+: ${PARTNER_BAR_EMPTY:=░}

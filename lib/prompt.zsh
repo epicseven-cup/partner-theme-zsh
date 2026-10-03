@@ -22,7 +22,8 @@ _partner_precmd() {
   if [[ -n $REPLY_STAGE ]]; then
     _partner_git_counts
     local lines="" counts=""
-    (( REPLY_DELETED > 0 )) && lines+="%F{167}-${REPLY_DELETED}%f"
+    (( REPLY_FILES > 0 )) && lines+="${REPLY_FILES} file${${REPLY_FILES:#1}:+s}"
+    (( REPLY_DELETED > 0 )) && lines+="${lines:+ }%F{167}-${REPLY_DELETED}%f"
     (( REPLY_ADDED > 0 )) && lines+="${lines:+ }%F{71}+${REPLY_ADDED}%f"
     [[ -n $lines ]] && counts+=" %F{240}│%f ${lines}"
     (( REPLY_UNPUSHED > 0 )) && counts+=" %F{240}│%f %F{214}↑${REPLY_UNPUSHED}%f"

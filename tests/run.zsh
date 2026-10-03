@@ -105,9 +105,10 @@ print "1\nX\n3\n4\n5" > f.txt        # -1 +3 (unstaged)
 print "a\nb" > g.txt; git add g.txt     # +2 (staged)
 print untracked > u.txt                # not counted
 _partner_git_counts
+eq "files changed (untracked included)" "$REPLY_FILES" "3"
 eq "added lines (staged + unstaged)"   "$REPLY_ADDED"   "5"
 eq "deleted lines"                     "$REPLY_DELETED" "1"
-_partner_precmd; match "prompt shows -/+ and ↑ on the top line" "${PROMPT%%$'\n'*}" "*│*-1*+5*│*↑3*"
+_partner_precmd; match "prompt shows -/+ and ↑ on the top line" "${PROMPT%%$'\n'*}" "*│*3 files*-1*+5*│*↑3*"
 git add -A; git commit -q -m x; git push -q origin topic
 _partner_precmd; [[ ${PROMPT%%$'\n'*} == *│* ]] && bad "counts hidden when zero" "no │" "$PROMPT" || ok "counts hidden when zero"
 

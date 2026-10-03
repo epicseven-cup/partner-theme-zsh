@@ -20,5 +20,5 @@ typeset -gA PARTNER_STAGE_COLORS
 : ${PARTNER_BAR_FULL:=█}
 : ${PARTNER_BAR_EMPTY:=░}
 
-# Icon shown before the changed-file count on the pet line (✎2).
-: ${PARTNER_FILES_ICON:=✎}
+# Icon shown before the changed-file count on the pet line (~2).
+: ${PARTNER_FILES_ICON:=~}

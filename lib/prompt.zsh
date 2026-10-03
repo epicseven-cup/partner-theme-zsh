@@ -21,10 +21,11 @@ _partner_precmd() {
   local top=""
   if [[ -n $REPLY_STAGE ]]; then
     _partner_git_counts
-    local counts=""
-    (( REPLY_CHANGES > 0 )) && counts+=" ±${REPLY_CHANGES}"
-    (( REPLY_UNPUSHED > 0 )) && counts+=" ↑${REPLY_UNPUSHED}"
-    [[ -n $counts ]] && counts=" %F{240}│%f%F{214}${counts}%f"
+    local lines="" counts=""
+    (( REPLY_DELETED > 0 )) && lines+="%F{167}-${REPLY_DELETED}%f"
+    (( REPLY_ADDED > 0 )) && lines+="${lines:+ }%F{71}+${REPLY_ADDED}%f"
+    [[ -n $lines ]] && counts+=" %F{240}│%f ${lines}"
+    (( REPLY_UNPUSHED > 0 )) && counts+=" %F{240}│%f %F{214}↑${REPLY_UNPUSHED}%f"
     top="$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{$lc}${REPLY_BAR}%f %F{240}${REPLY_COUNT} commit${${REPLY_COUNT:#1}:+s}%f${counts}"$'\n'
   fi
 

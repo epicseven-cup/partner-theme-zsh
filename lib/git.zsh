@@ -88,12 +88,16 @@ _partner_commits_today() {
 
 _partner_count_lines() { local -a l; [[ -n $1 ]] && l=("${(@f)1}"); print ${#l} }
 
-# Sets REPLY_CHANGES (files with uncommitted changes, untracked included) and
+# Sets REPLY_ADDED / REPLY_DELETED (lines added and removed in tracked files vs HEAD,
+# staged and unstaged together; untracked files and binary files aren't counted) and
 # REPLY_UNPUSHED (commits on HEAD that aren't on any origin branch; empty when
 # there is no origin to compare against).
 _partner_git_counts() {
-  REPLY_CHANGES= REPLY_UNPUSHED=
-  REPLY_CHANGES=$(_partner_count_lines "$(git status --porcelain 2>/dev/null)")
+  REPLY_ADDED=0 REPLY_DELETED=0 REPLY_UNPUSHED=
+  local a d f
+  git diff HEAD --numstat 2>/dev/null | while read -r a d f; do
+    [[ $a == <-> ]] && (( REPLY_ADDED += a, REPLY_DELETED += d ))
+  done
   [[ -n $(git for-each-ref --count=1 refs/remotes/origin 2>/dev/null) ]] &&
     REPLY_UNPUSHED=$(git rev-list --count HEAD --not --remotes=origin 2>/dev/null)
   return 0

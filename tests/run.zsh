@@ -86,9 +86,10 @@ commit 1; vcs_info; _partner_pet
 eq "6 commits today: on fire" "$REPLY_FIRE" "1"
 
 print -P "%B== uncommitted and unpushed ==%b"
-new_repo; commit 1
+new_repo; print "1\n2\n3" > f.txt; git add f.txt; git commit -q -m f
 _partner_git_counts
-eq "clean repo: no changes"            "$REPLY_CHANGES"  "0"
+eq "clean repo: 0 added"               "$REPLY_ADDED"    "0"
+eq "clean repo: 0 deleted"             "$REPLY_DELETED"  "0"
 eq "no origin: unpushed is empty"      "$REPLY_UNPUSHED" ""
 git init -q --bare -b main $tmp/origin.git
 git remote add origin $tmp/origin.git; git push -q origin main; git fetch -q
@@ -100,13 +101,15 @@ eq "2 local commits: unpushed is 2"    "$REPLY_UNPUSHED" "2"
 git checkout -q -b topic; commit 1
 _partner_git_counts
 eq "new branch counts commits not on origin" "$REPLY_UNPUSHED" "3"
-print a > a.txt; print b > b.txt
-git add a.txt; print more >> a.txt
+print "1\nX\n3\n4\n5" > f.txt        # -1 +3 (unstaged)
+print "a\nb" > g.txt; git add g.txt     # +2 (staged)
+print untracked > u.txt                # not counted
 _partner_git_counts
-eq "a file that is staged and modified counts once; untracked counts" "$REPLY_CHANGES" "2"
-_partner_precmd; match "prompt shows ± and ↑ counts" "$PROMPT" "*±2*↑3*"
+eq "added lines (staged + unstaged)"   "$REPLY_ADDED"   "5"
+eq "deleted lines"                     "$REPLY_DELETED" "1"
+_partner_precmd; match "prompt shows -/+ and ↑ on the top line" "${PROMPT%%$'\n'*}" "*│*-1*+5*│*↑3*"
 git add -A; git commit -q -m x; git push -q origin topic
-_partner_precmd; [[ $PROMPT == *±* || $PROMPT == *↑* ]] && bad "counts hidden when zero" "no ±/↑" "$PROMPT" || ok "counts hidden when zero"
+_partner_precmd; [[ ${PROMPT%%$'\n'*} == *│* ]] && bad "counts hidden when zero" "no │" "$PROMPT" || ok "counts hidden when zero"
 
 print -P "%B== reroll ==%b"
 new_repo; commit 1

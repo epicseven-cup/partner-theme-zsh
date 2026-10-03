@@ -85,6 +85,29 @@ eq "5 commits today: not on fire" "$REPLY_FIRE" ""
 commit 1; vcs_info; _partner_pet
 eq "6 commits today: on fire" "$REPLY_FIRE" "1"
 
+print -P "%B== uncommitted and unpushed ==%b"
+new_repo; commit 1
+_partner_git_counts
+eq "clean repo: no changes"            "$REPLY_CHANGES"  "0"
+eq "no origin: unpushed is empty"      "$REPLY_UNPUSHED" ""
+git init -q --bare -b main $tmp/origin.git
+git remote add origin $tmp/origin.git; git push -q origin main; git fetch -q
+_partner_git_counts
+eq "pushed: unpushed is 0"             "$REPLY_UNPUSHED" "0"
+commit 2
+_partner_git_counts
+eq "2 local commits: unpushed is 2"    "$REPLY_UNPUSHED" "2"
+git checkout -q -b topic; commit 1
+_partner_git_counts
+eq "new branch counts commits not on origin" "$REPLY_UNPUSHED" "3"
+print a > a.txt; print b > b.txt
+git add a.txt; print more >> a.txt
+_partner_git_counts
+eq "a file that is staged and modified counts once; untracked counts" "$REPLY_CHANGES" "2"
+_partner_precmd; match "prompt shows ± and ↑ counts" "$PROMPT" "*±2*↑3*"
+git add -A; git commit -q -m x; git push -q origin topic
+_partner_precmd; [[ $PROMPT == *±* || $PROMPT == *↑* ]] && bad "counts hidden when zero" "no ±/↑" "$PROMPT" || ok "counts hidden when zero"
+
 print -P "%B== reroll ==%b"
 new_repo; commit 1
 vcs_info; _partner_pet; before=$REPLY_FULL

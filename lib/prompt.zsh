@@ -32,7 +32,11 @@ _partner_precmd() {
   local git_seg=""
   if [[ -n $vcs_info_msg_0_ ]]; then
     local gc=35; [[ $vcs_info_msg_0_ == *[*+?]* ]] && gc=178
-    git_seg="%K{$gc}%F{232} ⎇ ${vcs_info_msg_0_} %f%k%F{$gc}▌%f"
+    _partner_git_counts
+    local counts=""
+    (( REPLY_CHANGES > 0 )) && counts+=" ±${REPLY_CHANGES}"
+    (( REPLY_UNPUSHED > 0 )) && counts+=" ↑${REPLY_UNPUSHED}"
+    git_seg="%K{$gc}%F{232} ⎇ ${vcs_info_msg_0_}${counts} %f%k%F{$gc}▌%f"
   fi
   PROMPT="${top}${err}${path_seg}${git_seg} %F{$lc}❯%f "
   RPROMPT=""

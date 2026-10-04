@@ -60,7 +60,7 @@ _partner_pet() {
 
   local pet=${_PARTNER_PET_CACHE[$key]}
   if [[ -z $pet ]]; then
-    pet="${PARTNER_ANIMALS[$(_partner_pick "$key:animal" ${#PARTNER_ANIMALS})]}|${PARTNER_CLASSES[$(_partner_pick "$key:class" ${#PARTNER_CLASSES})]}|${PARTNER_RANKS[$(_partner_pick "$key:rank" ${#PARTNER_RANKS})]}|${PARTNER_TITLES[$(_partner_pick "$key:title" ${#PARTNER_TITLES})]}"
+    pet="${PARTNER_ANIMALS[$(_partner_pick "${key}:animal" ${#PARTNER_ANIMALS})]}|${PARTNER_CLASSES[$(_partner_pick "${key}:class" ${#PARTNER_CLASSES})]}|${PARTNER_RANKS[$(_partner_pick "${key}:rank" ${#PARTNER_RANKS})]}|${PARTNER_TITLES[$(_partner_pick "${key}:title" ${#PARTNER_TITLES})]}"
     _PARTNER_PET_CACHE[$key]=$pet
   fi
   local -a p=("${(@s:|:)pet}")

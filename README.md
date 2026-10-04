@@ -1,7 +1,7 @@
 # partner-theme-zsh
 
-An [Oh My Zsh](https://ohmyz.sh) theme where every git branch hatches its own pet.
-Your pet evolves as you commit on the branch, so your prompt shows how much work you've put in.
+An [Oh My Zsh](https://ohmyz.sh) theme where every git project hatches its own pet (or every branch, if you prefer).
+Your pet evolves as you commit, so your prompt shows how much work you've put in.
 
 ```
  ◆ Wizard Cat  ██░░ 7 commits │ ~2 +200 -500 │ ↑2
@@ -52,18 +52,20 @@ Updates are fast-forward only, and the new version loads the next time you open 
 
 The prompt has two lines:
 
-1. **The pet badge**: name, progress bar, your commit count on this branch, then your uncommitted line changes and unpushed commits (see below). Hidden outside a git repo and on a detached HEAD.
-2. **The working line**: current path, git branch, then the prompt arrow.
+1. **The pet badge**: name, progress bar and your commit count (an egg shows `0/1 to hatch`). When your pet hatches or evolves, a one-off message tells you. Hidden outside a git repo (and on a detached HEAD in branch scope).
+2. **The working line**: current path, git branch and its status (see below), then the prompt arrow.
 
-The branch segment is green when clean and amber when there are changes. Its suffix shows what changed: `*` unstaged, `+` staged, `?` untracked files. On the pet line, after the commit count and separated by `│`, `~N` is how many files have uncommitted changes (untracked included), and `+N -N` is the number of lines added and removed in tracked files since your last commit (staged and unstaged together; untracked and binary files aren't counted), and `↑N` is the number of commits not yet pushed to `origin`. Each part is hidden when it is zero, and `↑N` is hidden when the repo has no `origin`.
+The branch segment is green when clean and amber when there are changes. Its suffix shows what changed: `*` unstaged, `+` staged, `?` untracked files. On the working line, after the branch and separated by spaces, `+N -N` is the number of lines added and removed in tracked files since your last commit (staged and unstaged together; untracked and binary files aren't counted), and `↑N` is the number of commits not yet pushed to `origin`. `↓N` appears when your branch's upstream has commits you don't have yet (as of your last fetch; hidden without an upstream). `⟳ rebase (N behind main)` appears when your branch is missing commits from the default branch (origin's copy if you have one, from your last fetch), so you know it needs a rebase or merge. Each part is hidden when it is zero, and `↑N` is hidden when the repo has no `origin`.
 
 If the last command failed, a red `✖ <exit code>` badge appears before the path and the arrow turns red.
 
 ## How pets work
 
-Each branch gets a random animal, class, rank and title. The pick is derived from the repo name and branch name, so you get the same pet every time you come back to that branch.
+Each project gets a random animal, class, rank and title. The pick is derived from the repo name, so you get the same pet every time you come back, on any branch.
 
-The pet evolves with the commits **you** make on the branch:
+Prefer a pet per branch? Set `PARTNER_SCOPE=branch` (see Customise). The pick then also uses the branch name.
+
+The pet evolves with the commits **you** make, across the whole project by default, or on the branch with `PARTNER_SCOPE=branch`:
 
 | Commits | Stage | Example | Colour |
 |---|---|---|---|
@@ -71,12 +73,16 @@ The pet evolves with the commits **you** make on the branch:
 | 1+ | Hatchling | `Cat` | aqua |
 | 5+ | Class | `Wizard Cat` | orange |
 | 15+ | Rank | `Grand Wizard Cat` | violet |
-| 30+ | Legend | `Grand Wizard Cat of Green Builds` | magenta |
+| 30+ | Legend | `Grand Wizard Cat of Many Commits` | magenta |
 
 ### What counts as a commit
 
 - Only commits whose author email matches your `git config user.email`.
 - Merge commits are never counted.
+- **Project scope** (the default): all your commits in the repo count, across local branches and `origin`.
+
+The rules below apply to `PARTNER_SCOPE=branch`:
+
 - **Feature branches** count from the point you branched off, read from the branch's local reflog. Merging main into the branch, or the branch into main, doesn't change its pet.
 - **Default branch** (`main`, `master` or `trunk`, or whatever `origin/HEAD` points to): all your commits on it count.
 - **Fallback:** if the branch-off point is unknown (the reflog expired, or the branch was rebased), your commits that are not on the default branch count instead.
@@ -89,12 +95,12 @@ Commit more than 5 times in a day (6 or more, in this repo, on any branch) and t
 
 ```sh
 partner status   # your pet, progress, how many commits until it evolves, commits today
-partner reroll   # hatch a different pet for the current branch
+partner reroll   # hatch a different pet for the project (or the branch, in branch scope)
 ```
 
 `partner status` also tells you how the count was decided (for example "your commits since branching off at a1b2c3d").
 
-`partner reroll` stores a counter in the repo's git config (`partner.<branch>.seed`; the old `digivice.<branch>.seed` key is still read). Remove it with `git config --unset partner.<branch>.seed` to go back to the original pet.
+`partner reroll` stores a counter in the repo's git config (`partner.seed`, or `partner.<branch>.seed` in branch scope; the old `digivice.<branch>.seed` key is still read). Remove it with `git config --unset partner.seed` (or the branch key) to go back to the original pet.
 
 ## Customise
 
@@ -112,6 +118,7 @@ config/
 You can edit those files directly, or leave the repo untouched and override from `~/.zshrc`. Set values **before** the `source $ZSH/oh-my-zsh.sh` line. Anything you define there wins over the defaults:
 
 ```sh
+PARTNER_SCOPE=project          # project (one pet per repo) or branch (one per branch)
 PARTNER_ANIMALS=(Cat Dog Axolotl)
 PARTNER_LEVELS=(1 5 15 30)     # commits for each evolution
 PARTNER_FIRE_AT=6              # commits per day for the ember badge
@@ -124,7 +131,7 @@ Stage colours can be changed after Oh My Zsh loads:
 PARTNER_STAGE_COLORS[LEGEND]=220   # EGG, BABY, CLASS, GRAND, LEGEND, NONE
 ```
 
-> **Note:** pets are picked by position in each list. Adding, removing or reordering entries changes which pet existing branches get.
+> **Note:** pets are picked by position in each list. Adding, removing or reordering entries changes which pet existing projects and branches get.
 
 ## Project layout
 

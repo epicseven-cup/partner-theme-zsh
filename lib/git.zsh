@@ -72,6 +72,19 @@ _partner_branch_count() {
   fi
 }
 
+# Your commits anywhere in the repo (local branches plus origin; merges excluded).
+_partner_project_count() {
+  local me=$(git config user.email 2>/dev/null)
+  local -a who=(); [[ -n $me ]] && who=(--fixed-strings "--author=<$me>")
+  PARTNER_BRANCH_SCOPE="all your commits in this repo"
+  git rev-list --count --no-merges $who --branches --remotes=origin 2>/dev/null || print 0
+}
+
+# The commit count the pet evolves with, per PARTNER_SCOPE.
+_partner_count() {
+  if [[ $PARTNER_SCOPE == branch ]]; then _partner_branch_count; else _partner_project_count; fi
+}
+
 # Prints "hash<TAB>message" for each commit made in this repo today (any branch),
 # read from the local HEAD reflog. Counts new commits and cherry-picks; skips
 # amends, merges, pulls, rebases and checkouts.
@@ -88,19 +101,33 @@ _partner_commits_today() {
 
 _partner_count_lines() { local -a l; [[ -n $1 ]] && l=("${(@f)1}"); print ${#l} }
 
-# Sets REPLY_FILES (files with uncommitted changes, untracked included),
-# REPLY_ADDED / REPLY_DELETED (lines added and removed in tracked files vs HEAD,
+# Sets REPLY_BEHIND to how many commits the default branch (origin's if it exists,
+# else the local one) has that this branch doesn't, and REPLY_BEHIND_NAME to its
+# name. Empty on the default branch, a detached HEAD, or when there's no default.
+_partner_behind_default() {
+  REPLY_BEHIND= REPLY_BEHIND_NAME=
+  local branch=$(git symbolic-ref --short -q HEAD 2>/dev/null)
+  local -a d=(${=$(_partner_default_refs)})
+  [[ -n $branch ]] && (( ${#d} > 1 )) && [[ $branch != ${d[1]} ]] || return 0
+  local -i n=$(git rev-list --count "HEAD..${d[-1]}" 2>/dev/null)
+  (( n > 0 )) && REPLY_BEHIND=$n REPLY_BEHIND_NAME=${d[1]}
+  return 0
+}
+
+# Sets REPLY_ADDED / REPLY_DELETED (lines added and removed in tracked files vs HEAD,
 # staged and unstaged together; untracked files and binary files aren't counted) and
 # REPLY_UNPUSHED (commits on HEAD that aren't on any origin branch; empty when
-# there is no origin to compare against).
+# there is no origin to compare against) and REPLY_UPSTREAM_BEHIND (commits on the
+# branch's upstream you don't have yet; empty when it has no upstream).
 _partner_git_counts() {
-  REPLY_ADDED=0 REPLY_DELETED=0 REPLY_UNPUSHED=
-  REPLY_FILES=$(_partner_count_lines "$(git status --porcelain 2>/dev/null)")
+  REPLY_ADDED=0 REPLY_DELETED=0 REPLY_UNPUSHED= REPLY_UPSTREAM_BEHIND=
   local a d f
   git diff HEAD --numstat 2>/dev/null | while read -r a d f; do
     [[ $a == <-> ]] && (( REPLY_ADDED += a, REPLY_DELETED += d ))
   done
   [[ -n $(git for-each-ref --count=1 refs/remotes/origin 2>/dev/null) ]] &&
     REPLY_UNPUSHED=$(git rev-list --count HEAD --not --remotes=origin 2>/dev/null)
+  # commits on this branch's upstream that aren't local yet (empty without an upstream)
+  REPLY_UPSTREAM_BEHIND=$(git rev-list --count 'HEAD..@{u}' 2>/dev/null)
   return 0
 }

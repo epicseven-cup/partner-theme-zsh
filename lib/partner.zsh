@@ -5,31 +5,40 @@ partner() {
     status|today|pet)
       git rev-parse --is-inside-work-tree &>/dev/null || { print "not in a git repo"; return 1 }
       local branch=$(git symbolic-ref --short -q HEAD)
+      local where=${branch:-detached HEAD}
+      [[ $PARTNER_SCOPE == branch ]] || { where=$(git rev-parse --show-toplevel); where=${where:t} }
       vcs_info; _partner_pet
       if [[ -n $REPLY_STAGE ]]; then
         local lc=${PARTNER_STAGE_COLORS[$REPLY_STAGE]}
-        print -P "$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{240}(%f%F{214}${branch}%f%F{240})%f"
-        _partner_branch_count >/dev/null
+        print -P "$(_partner_badge "◆ ${REPLY_NAME}" $lc) %F{240}(%f%F{214}${where}%f%F{240})%f"
+        _partner_count >/dev/null
         print -P "  ${REPLY_BAR}  ${REPLY_COUNT} commit${${REPLY_COUNT:#1}:+s}  %F{240}(${PARTNER_BRANCH_SCOPE})%f"
         if [[ $REPLY_STAGE == EGG ]]; then
-          print -P "  hatches after ${REPLY_NEXT} commit${${REPLY_NEXT:#1}:+s} on this branch  %F{240}→ ???%f"
+          print -P "  hatches after ${REPLY_NEXT} commit${${REPLY_NEXT:#1}:+s} ${${PARTNER_SCOPE:#branch}:+in this project}${${PARTNER_SCOPE:#project}:+on this branch}  %F{240}→ ???%f"
         elif [[ -n $REPLY_NEXT ]]; then
           print -P "  evolves in $(( REPLY_NEXT - REPLY_COUNT )) more  %F{240}→ final form: ${REPLY_FULL}%f"
         else
           print -P "  %F{$lc}fully evolved%f"
         fi
       else
-        print "detached HEAD — no pet here"
+        print "detached HEAD — no pet here (PARTNER_SCOPE=branch)"
       fi
       local -i t=$(_partner_count_lines "$(_partner_commits_today)")
       print -P "  ${t} commit${${t:#1}:+s} today in this repo  %F{240}(on fire at ${PARTNER_FIRE_AT})%f"
       ;;
     reroll)
-      local branch=$(git symbolic-ref --short -q HEAD 2>/dev/null)
-      [[ -n $branch ]] || { print "need to be on a branch"; return 1 }
-      git config "partner.$branch.seed" $(( $(_partner_seed $branch) + 1 ))
+      local label
+      if [[ $PARTNER_SCOPE == branch ]]; then
+        label=$(git symbolic-ref --short -q HEAD 2>/dev/null)
+        [[ -n $label ]] || { print "need to be on a branch"; return 1 }
+        git config "partner.$label.seed" $(( $(_partner_seed $label) + 1 ))
+      else
+        label=$(git rev-parse --show-toplevel 2>/dev/null) || { print "not in a git repo"; return 1 }
+        label=${label:t}
+        git config partner.seed $(( $(git config --get partner.seed 2>/dev/null || print 0) + 1 ))
+      fi
       vcs_info; _partner_pet
-      print -P "%F{208}◆%f the egg cracks… ${branch} now raises: %B${REPLY_FULL}%b"
+      print -P "%F{208}◆%f the egg cracks… ${label} now raises: %B${REPLY_FULL}%b"
       ;;
     update)
       local out; out=$(git -C "$_partner_root" pull --ff-only 2>&1) || { print "update failed:\n$out\nrun 'partner reset' to restore a clean install"; return 1 }

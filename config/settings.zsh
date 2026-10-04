@@ -2,6 +2,11 @@
 (( ${#PARTNER_LEVELS} == 4 )) || typeset -ga PARTNER_LEVELS=(1 5 15 30)
 typeset -gi PARTNER_FIRE_AT=${PARTNER_FIRE_AT:-6}
 
+# One pet per project (the default), or one per git branch.
+#   project  one pet per repo, evolving with all your commits in it
+#   branch   every branch hatches its own pet, evolving with your commits on it
+: ${PARTNER_SCOPE:=project}
+
 # When you're on fire the badge turns to embers: dark red background, with the
 # pet's name still in its stage colour.
 : ${PARTNER_FIRE_BG:=52}    # ember red
@@ -20,5 +25,5 @@ typeset -gA PARTNER_STAGE_COLORS
 : ${PARTNER_BAR_FULL:=█}
 : ${PARTNER_BAR_EMPTY:=░}
 
-# Icon shown before the changed-file count on the pet line (~2).
-: ${PARTNER_FILES_ICON:='~'}
+# Icon shown in the "needs a rebase" notice (the branch is behind the default branch).
+: ${PARTNER_REBASE_ICON:='⟳'}

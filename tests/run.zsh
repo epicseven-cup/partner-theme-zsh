@@ -64,7 +64,8 @@ vcs_info; _partner_pet
 eq "legend bar is full" "$REPLY_BAR" "████"
 eq "legend has no next level" "$REPLY_NEXT" ""
 
-print -P "%B== counting ==%b"
+print -P "%B== counting (branch scope) ==%b"
+PARTNER_SCOPE=branch
 new_repo; commit 3
 git checkout -q -b feature; commit 2
 eq "feature branch counts only commits since branch-off" "$(_partner_branch_count)" "2"
@@ -78,6 +79,28 @@ _partner_branch_count >/dev/null && bad "detached HEAD returns failure" "exit 1"
 git checkout -q main
 git config user.email other@example.com
 eq "only your commits count" "$(_partner_branch_count)" "0"
+
+PARTNER_SCOPE=project
+
+print -P "%B== project scope ==%b"
+eq "default scope is project" "$PARTNER_SCOPE" "project"
+new_repo; commit 2
+git checkout -q -b feature; commit 2
+eq "project count spans all branches" "$(_partner_project_count)" "4"
+vcs_info; _partner_pet; proj=$REPLY_FULL
+git checkout -q main; vcs_info; _partner_pet
+eq "same pet on every branch" "$REPLY_FULL" "$proj"
+git checkout -q --detach; vcs_info; _partner_pet
+eq "pet still shown on detached HEAD" "$REPLY_STAGE" "BABY"
+git checkout -q main
+partner reroll >/dev/null
+eq "project reroll bumps partner.seed" "$(git config --get partner.seed)" "1"
+git config user.email other@example.com
+eq "project count only counts your commits" "$(_partner_project_count)" "0"
+PARTNER_SCOPE=branch
+git checkout -q feature; git config user.email t@example.com
+eq "branch scope: pet is per branch" "$(vcs_info; _partner_pet; print $REPLY_COUNT)" "2"
+PARTNER_SCOPE=project
 
 print -P "%B== fire ==%b"
 new_repo; commit 5; vcs_info; _partner_pet
@@ -105,14 +128,62 @@ print "1\nX\n3\n4\n5" > f.txt        # -1 +3 (unstaged)
 print "a\nb" > g.txt; git add g.txt     # +2 (staged)
 print untracked > u.txt                # not counted
 _partner_git_counts
-eq "files changed (untracked included)" "$REPLY_FILES" "3"
 eq "added lines (staged + unstaged)"   "$REPLY_ADDED"   "5"
 eq "deleted lines"                     "$REPLY_DELETED" "1"
-_partner_precmd; match "prompt shows -/+ and ↑ on the top line" "${PROMPT%%$'\n'*}" "*│*\~3*+5*-1*│*↑3*"
+_partner_precmd >/dev/null; match "folder line shows +/- and ↑" "${PROMPT##*$'\n'}" "*+5*-1*↑3*"
+match "pet line has no git status" "${PROMPT%%$'\n'*}" "*commit*"; [[ ${PROMPT%%$'\n'*} == *+5* ]] && bad "pet line has no git status" "no +5" "${PROMPT%%$'\n'*}"
 git add -A; git commit -q -m x; git push -q origin topic
-_partner_precmd; [[ ${PROMPT%%$'\n'*} == *│* ]] && bad "counts hidden when zero" "no │" "$PROMPT" || ok "counts hidden when zero"
+_partner_precmd >/dev/null; [[ ${PROMPT##*$'\n'} == *[+↑↓⟳]* ]] && bad "counts hidden when zero" "no status" "$PROMPT" || ok "counts hidden when zero"
 
-print -P "%B== reroll ==%b"
+print -P "%B== needs rebase ==%b"
+new_repo; commit 2
+git checkout -q -b topic; commit 1 topic-work
+_partner_behind_default; eq "up to date with main: no notice" "$REPLY_BEHIND" ""
+git checkout -q main; commit 2 main-work; git checkout -q topic
+_partner_behind_default
+eq "behind main by 2" "$REPLY_BEHIND" "2"
+eq "names the default branch" "$REPLY_BEHIND_NAME" "main"
+_partner_precmd >/dev/null; match "prompt shows rebase notice" "${PROMPT##*$'\n'}" "*rebase \(2 behind main\)*"
+git rebase -q main; _partner_behind_default
+eq "after rebase: no notice" "$REPLY_BEHIND" ""
+git checkout -q main; _partner_behind_default
+eq "on the default branch: no notice" "$REPLY_BEHIND" ""
+
+print -P "%B== upstream behind ==%b"
+new_repo; commit 2
+git init -q --bare -b main $tmp/up.git; git remote add origin $tmp/up.git; git push -q -u origin main
+_partner_git_counts; eq "in sync: 0 to pull" "$REPLY_UPSTREAM_BEHIND" "0"
+git clone -q $tmp/up.git $tmp/other; git -C $tmp/other -c user.email=o@x.com -c user.name=o commit -q --allow-empty -m remote-work; git -C $tmp/other push -q origin main
+git fetch -q; _partner_git_counts
+eq "1 commit upstream: 1 to pull" "$REPLY_UPSTREAM_BEHIND" "1"
+_partner_precmd >/dev/null; match "prompt shows ↓ behind upstream" "${PROMPT##*$'\n'}" "*↓1*"
+git checkout -q -b local-only; _partner_git_counts
+eq "no upstream: empty" "$REPLY_UPSTREAM_BEHIND" ""
+rm -rf $tmp/other
+
+print -P "%B== hatch and evolve messages ==%b"
+new_repo
+vcs_info; _partner_pet; out=$(_partner_announce)
+eq "first sighting is silent" "$out" ""
+eq "stage is recorded" "$(git config --get partner.stage)" "EGG"
+commit 1; vcs_info; _partner_pet; out=$(_partner_announce)
+match "egg hatching is announced" "$out" "*egg hatched*"
+vcs_info; _partner_pet; out=$(_partner_announce)
+eq "announced only once" "$out" ""
+commit 4; vcs_info; _partner_pet; out=$(_partner_announce)
+match "evolving is announced" "$out" "*evolved*"
+git config partner.stage LEGEND; vcs_info; _partner_pet; out=$(_partner_announce)
+eq "going down a stage is silent" "$out" ""
+eq "…and the new stage is recorded" "$(git config --get partner.stage)" "CLASS"
+PARTNER_SCOPE=branch
+new_repo; commit 1; vcs_info; _partner_pet
+eq "branch scope keeps the stage per branch" "$REPLY_STAGE_KEY" "partner.main.stage"
+PARTNER_SCOPE=project
+new_repo; vcs_info; _partner_pet
+_partner_precmd >/dev/null; match "egg shows commits to hatch" "${PROMPT%%$'\n'*}" "*0/1 to hatch*"
+
+print -P "%B== reroll (branch scope) ==%b"
+PARTNER_SCOPE=branch
 new_repo; commit 1
 vcs_info; _partner_pet; before=$REPLY_FULL
 eq "pet is stable between calls" "$(vcs_info; _partner_pet; print $REPLY_FULL)" "$before"
@@ -120,6 +191,8 @@ partner reroll >/dev/null
 eq "reroll bumps the seed" "$(git config --get partner.main.seed)" "1"
 git config --unset partner.main.seed; git config digivice.main.seed 4
 eq "legacy digivice seed is still read" "$(_partner_seed main)" "4"
+
+PARTNER_SCOPE=project
 
 print -P "%B== command ==%b"
 match "partner with no args prints usage" "$(partner 2>&1)" "usage: partner*"

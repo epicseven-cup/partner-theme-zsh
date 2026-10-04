@@ -3,10 +3,13 @@
 An [Oh My Zsh](https://ohmyz.sh) theme where every git project hatches its own pet (or every branch, if you prefer).
 Your pet evolves as you commit, so your prompt shows how much work you've put in.
 
-```
- ◆ Wizard Cat  ██░░ 7 commits │ ~2 +200 -500 │ ↑2
- ~/projects/app  ⎇ feature/login*  ❯
-```
+An egg hatching on the first commit:
+
+![An egg hatching into a Hedgehog after the first commit](docs/hatching.png)
+
+A fully evolved pet after 33 commits:
+
+![An S-Rank Wizard Hedgehog the Relentless with 33 commits](docs/evolved.png)
 
 ## Requirements
 
@@ -96,11 +99,13 @@ Commit more than 5 times in a day (6 or more, in this repo, on any branch) and t
 ```sh
 partner status   # your pet, progress, how many commits until it evolves, commits today
 partner reroll   # hatch a different pet for the project (or the branch, in branch scope)
+partner today    # same as status
+partner pet      # same as status
 ```
 
 `partner status` also tells you how the count was decided (for example "your commits since branching off at a1b2c3d").
 
-`partner reroll` stores a counter in the repo's git config (`partner.seed`, or `partner.<branch>.seed` in branch scope; the old `digivice.<branch>.seed` key is still read). Remove it with `git config --unset partner.seed` (or the branch key) to go back to the original pet.
+`partner reroll` stores a counter in the repo's git config (`partner.seed`, or `partner.<branch>.seed` in branch scope). Remove it with `git config --unset partner.seed` (or the branch key) to go back to the original pet.
 
 ## Customise
 
@@ -123,6 +128,9 @@ PARTNER_ANIMALS=(Cat Dog Axolotl)
 PARTNER_LEVELS=(1 5 15 30)     # commits for each evolution
 PARTNER_FIRE_AT=6              # commits per day for the ember badge
 PARTNER_FIRE_BG=52             # ember background colour (256-colour code)
+PARTNER_BAR_FULL=█             # progress bar glyphs
+PARTNER_BAR_EMPTY=░
+PARTNER_REBASE_ICON='⟳'        # icon in the "needs a rebase" notice
 ```
 
 Stage colours can be changed after Oh My Zsh loads:
@@ -142,7 +150,10 @@ lib/
   git.zsh                 vcs_info setup, branch-off and commit counting
   pet.zsh                 stable per-branch pick and evolution stage
   prompt.zsh              badge and prompt rendering
-  partner.zsh                the `partner` command
+  partner.zsh             the `partner` command
+tests/run.zsh             test suite
+docs/                     README screenshots
+.github/workflows/        CI
 ```
 
 ## Troubleshooting

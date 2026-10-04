@@ -58,7 +58,7 @@ partner() {
       touch "$_partner_root/.git/last-update"
       print "reset done, run 'exec zsh' to reload"
       ;;
-    *) print "usage: partner status | partner reroll | partner update | partner reset" ;;
+    *) print "usage: partner status (or today, pet) | partner reroll | partner update | partner reset" ;;
   esac
 }
 

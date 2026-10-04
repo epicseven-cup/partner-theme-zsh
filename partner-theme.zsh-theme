@@ -30,6 +30,8 @@
 #   PARTNER_LEVELS=(1 5 15 30)   evolution thresholds
 #   PARTNER_FIRE_AT=6            commits today needed for ON FIRE
 #   PARTNER_FIRE_BG=52           ember background when on fire
+#   PARTNER_BAR_FULL=█           progress bar glyphs (PARTNER_BAR_EMPTY=░)
+#   PARTNER_REBASE_ICON='⟳'      icon in the "needs a rebase" notice
 #   PARTNER_AUTO_UPDATE=1        pull theme updates in the background once a day
 # Outside a repo (or on a detached HEAD in branch scope) the pet is hidden.
 # A failed command flashes its exit code.

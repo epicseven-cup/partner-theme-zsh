@@ -189,8 +189,6 @@ vcs_info; _partner_pet; before=$REPLY_FULL
 eq "pet is stable between calls" "$(vcs_info; _partner_pet; print $REPLY_FULL)" "$before"
 partner reroll >/dev/null
 eq "reroll bumps the seed" "$(git config --get partner.main.seed)" "1"
-git config --unset partner.main.seed; git config digivice.main.seed 4
-eq "legacy digivice seed is still read" "$(_partner_seed main)" "4"
 
 PARTNER_SCOPE=project
 

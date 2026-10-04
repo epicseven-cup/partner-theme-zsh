@@ -4,17 +4,9 @@
 _partner_pick() { local s=$(print -rn -- "$1" | cksum); local -i h=${s%% *}; print $(( h % $2 + 1 )) }
 
 # Per-branch reroll counter, stored in the repo: git config partner.<branch>.seed
-# Falls back to the old digivice.<branch>.seed key so existing pets don't change.
 # In project scope the counter is the repo-wide git config partner.seed instead.
-_partner_seed() { git config --get "partner.$1.seed" 2>/dev/null || git config --get "digivice.$1.seed" 2>/dev/null || print 0 }
+_partner_seed() { git config --get "partner.$1.seed" 2>/dev/null || print 0 }
 
-# Builds the pet for this repo (or repo + branch, with PARTNER_SCOPE=branch). Sets:
-#   REPLY_STAGE  EGG | BABY | CLASS | GRAND | LEGEND  (empty = no pet shown)
-#   REPLY_NAME   e.g. "Grand Wizard Cat"
-#   REPLY_FULL   name incl. final-form title, even before it's earned
-#   REPLY_BAR    ██░░           REPLY_COUNT your commits (project or branch)
-#   REPLY_NEXT   commits needed for the next evolution (empty at max)
-#   REPLY_FIRE   1 when you've committed PARTNER_FIRE_AT+ times today
 # Progress bar with $1 of 4 cells filled, using PARTNER_BAR_FULL / PARTNER_BAR_EMPTY.
 _partner_bar() { print -rn -- "${(pl:$1::$PARTNER_BAR_FULL:)}${(pl:$((4-$1))::$PARTNER_BAR_EMPTY:)}" }
 
@@ -40,6 +32,14 @@ _partner_announce() {
 }
 
 typeset -gA _PARTNER_PET_CACHE
+
+# Builds the pet for this repo (or repo + branch, with PARTNER_SCOPE=branch). Sets:
+#   REPLY_STAGE  EGG | BABY | CLASS | GRAND | LEGEND  (empty = no pet shown)
+#   REPLY_NAME   e.g. "Grand Wizard Cat"
+#   REPLY_FULL   name incl. final-form title, even before it's earned
+#   REPLY_BAR    ██░░           REPLY_COUNT your commits (project or branch)
+#   REPLY_NEXT   commits needed for the next evolution (empty at max)
+#   REPLY_FIRE   1 when you've committed PARTNER_FIRE_AT+ times today
 _partner_pet() {
   REPLY_STAGE_KEY= REPLY_STAGE= REPLY_NAME= REPLY_FULL= REPLY_BAR= REPLY_COUNT= REPLY_NEXT= REPLY_FIRE=
   [[ -n $vcs_info_msg_0_ ]] || return
